@@ -1504,6 +1504,26 @@ function WorkbenchAppContent({ children }: { children: ReactNode }) {
     });
   }
 
+  function handleDroneEnabledChange(enabled: boolean) {
+    setResult((current) => {
+      if (!current) return current;
+      const next = structuredClone(current);
+      const plan = next.maa.plans[activeShift];
+      if (plan?.drones) plan.drones.enable = enabled;
+      return next;
+    });
+  }
+
+  function handleDroneOrderChange(order: "pre" | "post") {
+    setResult((current) => {
+      if (!current) return current;
+      const next = structuredClone(current);
+      const plan = next.maa.plans[activeShift];
+      if (plan?.drones) plan.drones.order = order;
+      return next;
+    });
+  }
+
   function handleRoomLevelChange(roomId: string, level: number) {
     applyPartialLocalLayoutEdit((current) => updateRoomLevel(current, roomId, level));
   }
@@ -1974,6 +1994,8 @@ function WorkbenchAppContent({ children }: { children: ReactNode }) {
       onUpgradeSimulationOpenChange: setUpgradeSimulationOpen,
       onRun: handleProtectedRun,
       onAutoDroneAllocation: handleAutoDroneAllocation,
+      onDroneEnabledChange: handleDroneEnabledChange,
+      onDroneOrderChange: handleDroneOrderChange,
       manualDroneSelection: Boolean(manualDroneShifts[activeShift]),
       onSimulateUpgrades: handleSimulateUpgrades,
       upgradeComparison: upgradeComparison?.baseline === result ? { trial: upgradeComparison.trial } : null,

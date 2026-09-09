@@ -354,6 +354,8 @@ export interface InfraCalculatorProps {
   onUpgradeSimulationOpenChange: (open: boolean) => void;
   onRun: () => void;
   onAutoDroneAllocation: () => void;
+  onDroneEnabledChange: (enabled: boolean) => void;
+  onDroneOrderChange: (order: "pre" | "post") => void;
   manualDroneSelection?: boolean;
   onSimulateUpgrades: (trialOperbox: OperBoxEntry[]) => Promise<PublicPlanData>;
   upgradeComparison: { trial: PublicPlanData } | null;
@@ -385,7 +387,7 @@ export function InfraCalculator(props: InfraCalculatorProps) {
     feedbackResult,
     operbox,
     sampleLoading, loading, canRun, runCooldownSeconds, hasBox, hasPersonalBox, feedbackDisabledForSampleBox, plannerReady, websiteAuthenticated, showOnboarding, taskQueue, animatePlanEntrance, animateEmptyScheduleEntrance, onPlanEntranceConsumed, requiresAccount = false, accountControl,
-    onRunSampleTrial, onStartPersonalFlow, onDismissOnboarding, onOpenSetup, upgradeSimulationOpen, onOpenUpgradeSimulation, onUpgradeSimulationOpenChange, onRun, onAutoDroneAllocation, manualDroneSelection = false, onSimulateUpgrades, upgradeComparison, scheduleVariant, onScheduleVariantChange, onUpgradeTrialReady, onCancelRun,
+    onRunSampleTrial, onStartPersonalFlow, onDismissOnboarding, onOpenSetup, upgradeSimulationOpen, onOpenUpgradeSimulation, onUpgradeSimulationOpenChange, onRun, onAutoDroneAllocation, onDroneEnabledChange, onDroneOrderChange, manualDroneSelection = false, onSimulateUpgrades, upgradeComparison, scheduleVariant, onScheduleVariantChange, onUpgradeTrialReady, onCancelRun,
     onSetActiveShift, onMarkIssue, onPerformanceIssue,
     onFactoryRecipeChange, onTradeOrderChange, droneTargetRoomId, onDroneTargetChange,
     onEditManualSchedule, onDownloadMaa,
@@ -679,6 +681,24 @@ export function InfraCalculator(props: InfraCalculatorProps) {
                 <div className="flex flex-wrap items-center justify-end gap-2 max-sm:w-full max-sm:justify-between" data-shift-actions>
                   {fiammettaTarget ? (
                     <FiammettaTargetChip target={fiammettaTarget} portrait={fiammettaPortrait} />
+                  ) : null}
+                  {scheduleResult && activePlan?.drones ? (
+                    <div className="grid min-w-[260px] gap-2 rounded-[min(var(--radius-md),12px)] border border-border bg-background/90 p-2 shadow-sm" data-drone-settings>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-medium">自动使用无人机</span>
+                        <div className="inline-flex overflow-hidden rounded-[min(var(--radius-md),10px)] border border-border" role="group" aria-label="自动使用无人机">
+                          <Button type="button" size="xs" variant={activePlan.drones.enable === false ? "ghost" : "default"} aria-pressed={activePlan.drones.enable !== false} onClick={() => onDroneEnabledChange(true)}>开</Button>
+                          <Button type="button" size="xs" variant={activePlan.drones.enable === false ? "default" : "ghost"} aria-pressed={activePlan.drones.enable === false} onClick={() => onDroneEnabledChange(false)}>关</Button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-medium">无人机使用规则</span>
+                        <div className="inline-flex overflow-hidden rounded-[min(var(--radius-md),10px)] border border-border" role="group" aria-label="无人机使用规则">
+                          <Button type="button" size="xs" variant={(activePlan.drones.order ?? "pre") === "pre" ? "default" : "ghost"} aria-pressed={(activePlan.drones.order ?? "pre") === "pre"} onClick={() => onDroneOrderChange("pre")}>先用</Button>
+                          <Button type="button" size="xs" variant={activePlan.drones.order === "post" ? "default" : "ghost"} aria-pressed={activePlan.drones.order === "post"} onClick={() => onDroneOrderChange("post")}>后用</Button>
+                        </div>
+                      </div>
+                    </div>
                   ) : null}
                   <DroneTargetChip drones={activePlan?.drones} />
                   {scheduleResult && onDroneTargetChange ? (
