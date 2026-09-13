@@ -10,6 +10,26 @@ export function configuredAdminIds(value = process.env.BETTER_AUTH_ADMIN_USER_ID
   return new Set((value ?? "").split(",").map((id) => id.trim()).filter(Boolean));
 }
 
+export function isLocalAuthBypassEnabled(
+  deploymentEnv = process.env.APP_DEPLOYMENT_ENV ?? process.env.NODE_ENV,
+  bypass = process.env.RIIC_LOCAL_ADMIN_BYPASS,
+): boolean {
+  return deploymentEnv === "development" && bypass !== "0";
+}
+
+export function buildLocalWebsiteSession() {
+  return {
+    session: { expiresAt: new Date("2099-12-31T23:59:59.999Z") },
+    user: {
+      id: "local-admin",
+      name: "本地测试账号",
+      email: "local-admin@localhost",
+      createdAt: new Date("2000-01-01T00:00:00.000Z"),
+      emailVerified: true,
+    },
+  };
+}
+
 export function requireAuthBaseUrl(
   value = process.env.BETTER_AUTH_URL,
   deploymentEnv = process.env.APP_DEPLOYMENT_ENV ?? process.env.NODE_ENV,

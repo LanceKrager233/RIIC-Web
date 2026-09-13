@@ -6,8 +6,10 @@ import { getDatabase } from "@/server/db";
 import { user } from "@/server/db/schema";
 import { websiteSession } from ".";
 import { websiteAdminAccess } from "./admin-access";
+import { buildLocalWebsiteSession, isLocalAuthBypassEnabled } from "./config";
 
 export async function requireWebsiteSession(request: Request | Headers) {
+  if (isLocalAuthBypassEnabled()) return buildLocalWebsiteSession();
   let session;
   try {
     session = await websiteSession(request);

@@ -1,3 +1,9 @@
+import { pinyin } from "pinyin-pro";
+
+const OPERATOR_PINYIN_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  "仇白": ["qiubai"],
+};
+
 // 基建技能房间标签：技能 id 第一个下划线之前就是房间前缀，
 // 例如 control_tra_spd_000 → control → 控制中枢。无依赖，可被页面/组件/测试直接复用。
 
@@ -110,6 +116,38 @@ export function operatorMatchesNameContains(name: string, query: string): boolea
   return name.toLocaleLowerCase("zh-CN").includes(normalizedQuery);
 }
 
+function searchMatchRank(value: string, query: string): number | null {
+  const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
+  if (!normalizedQuery) return null;
+  if (value.toLocaleLowerCase("zh-CN").includes(normalizedQuery)) return 0;
+  const initials = pinyin(value, { pattern: "first", toneType: "none", type: "array" }).join("").toLocaleLowerCase("en-US");
+  if (initials.includes(normalizedQuery)) return 1;
+  const fullPinyin = pinyin(value, { toneType: "none", type: "array" }).join("").toLocaleLowerCase("en-US");
+  return fullPinyin.includes(normalizedQuery)
+    || (OPERATOR_PINYIN_ALIASES[value] ?? []).some((alias) => alias.includes(normalizedQuery))
+    ? 1
+    : null;
+}
+
+function operatorSearchRank<T extends OperatorWithSkills>(
+  operator: T,
+  query: string,
+  skillLookup: SkillRecordLookup,
+): number {
+  const nameRank = searchMatchRank(operator.name, query);
+  if (nameRank !== null) return nameRank;
+  let best = Number.POSITIVE_INFINITY;
+  for (const { id } of operator.buildingSkills) {
+    const skill = skillLookup(id);
+    if (!skill) continue;
+    const skillRank = searchMatchRank(skill.name ?? "", query);
+    if (skillRank !== null) best = Math.min(best, 3 + skillRank);
+    const descriptionRank = searchMatchRank(skill.description ?? "", query);
+    if (descriptionRank !== null) best = Math.min(best, 5 + descriptionRank);
+  }
+  return best;
+}
+
 /** 搜索命中干员名称、技能名称或技能纯文本描述（任意一项命中即可）。 */
 export function operatorMatchesQuery(
   name: string,
@@ -119,7 +157,7 @@ export function operatorMatchesQuery(
 ): boolean {
   const normalizedQuery = query.trim().toLocaleLowerCase("zh-CN");
   if (!normalizedQuery) return true;
-  if (name.toLocaleLowerCase("zh-CN").includes(normalizedQuery)) return true;
+  if (searchMatchRank(name, normalizedQuery) !== null) return true;
   return skillIds.some((id) => {
     const skill = skillLookup(id);
     if (!skill) return false;
@@ -152,8 +190,11 @@ export function filterOperators<T extends OperatorWithSkills>(
       );
     })
     .sort((left, right) => {
-      // 搜索时按名字排序便于查找；默认浏览按数据仓库原始顺序倒序（新在前）。
-      if (normalizedQuery) return left.name.localeCompare(right.name, "zh-CN");
+      // 搜索时优先干员名，再技能名，最后技能描述；默认浏览按数据仓库顺序。
+      if (normalizedQuery) {
+        return operatorSearchRank(left, query, skillLookup) - operatorSearchRank(right, query, skillLookup)
+          || left.name.localeCompare(right.name, "zh-CN");
+      }
       return (right.order ?? 0) - (left.order ?? 0) || left.name.localeCompare(right.name, "zh-CN");
     });
 }

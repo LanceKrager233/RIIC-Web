@@ -7,7 +7,7 @@ import { getDatabase } from "@/server/db";
 import { deleteWebsiteAccountPrivateArtifacts } from "./account-deletion";
 import { websiteAccountNameDatabaseHooks } from "./account-name-hooks";
 import { sendAuthEmail } from "./email";
-import { configuredAdminIds, requireAuthBaseUrl, requireAuthSecret } from "./config";
+import { buildLocalWebsiteSession, configuredAdminIds, isLocalAuthBypassEnabled, requireAuthBaseUrl, requireAuthSecret } from "./config";
 import { passwordStrengthHook } from "./password-strength-hook";
 
 function createAuth() {
@@ -64,5 +64,6 @@ export function getAuth(): Auth {
 }
 
 export async function websiteSession(request: Request | Headers) {
+  if (isLocalAuthBypassEnabled()) return buildLocalWebsiteSession();
   return getAuth().api.getSession({ headers: request instanceof Headers ? request : request.headers });
 }

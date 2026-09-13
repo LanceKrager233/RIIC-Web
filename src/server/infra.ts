@@ -80,7 +80,8 @@ const repoRoot = path.resolve(/* turbopackIgnore: true */ process.cwd());
 const bundledCliRoot = path.join(repoRoot, "bin");
 const bundledDataRoot = path.join(bundledCliRoot, "data");
 const bundledFixtureRoot = path.join(repoRoot, "fixtures");
-const coreRoot = path.resolve(/* turbopackIgnore: true */ process.env.INFRA_CORE_ROOT || path.join(repoRoot, "..", "ArknightsInfraCalc-v2"));
+// 5174 本地环境固定使用 v3 求解器；仍支持 INFRA_CORE_ROOT 显式覆盖。
+const coreRoot = path.resolve(/* turbopackIgnore: true */ process.env.INFRA_CORE_ROOT || path.join(repoRoot, "..", "ArknightsInfraCalc-v3"));
 const storageRoot = path.resolve(/* turbopackIgnore: true */ process.env.BETA_STORAGE_DIR || path.join(repoRoot, "server", "storage"));
 const feedbackRoot = path.resolve(/* turbopackIgnore: true */ process.env.BETA_FEEDBACK_DIR || path.join(storageRoot, "feedback"));
 const cliRunRoot = path.resolve(/* turbopackIgnore: true */ process.env.BETA_CLI_RUN_DIR || path.join(storageRoot, "cli-runs"));
@@ -151,6 +152,7 @@ class PlanArtifactPersistenceError extends Error {
 function cliCandidates() {
   const platformCliName = process.platform === "win32" ? "infra-cli.exe" : "infra-cli";
   const fallbackCliName = process.platform === "win32" ? "infra-cli" : "infra-cli.exe";
+  const v3CliName = process.platform === "win32" ? "arknights-infra-v3.exe" : "arknights-infra-v3";
   const bundledPlatformCli = path.join(bundledCliRoot, platformCliName);
   const candidates = [
     process.env.INFRA_CLI_PATH,
@@ -161,6 +163,8 @@ function cliCandidates() {
     path.join(repoRoot, fallbackCliName),
     path.join(coreRoot, "target", "release", platformCliName),
     path.join(coreRoot, "target", "debug", platformCliName),
+    path.join(coreRoot, "target", "release", v3CliName),
+    path.join(coreRoot, "target", "debug", v3CliName),
     path.join(coreRoot, "target", "release", fallbackCliName),
     path.join(coreRoot, "target", "debug", fallbackCliName),
   ].filter(Boolean) as string[];

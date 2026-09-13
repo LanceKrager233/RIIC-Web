@@ -4,6 +4,7 @@ export interface UserSettings {
   strictMaaOperatorOrder: boolean;
   showProgressionRecalculate: boolean;
   showManualScheduleEdit: boolean;
+  showMower: boolean;
   scheduleViewControl: "tabs" | "select";
   linkShiftViewControl: boolean;
   shiftViewControl: "tabs" | "select";
@@ -19,6 +20,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   strictMaaOperatorOrder: true,
   showProgressionRecalculate: true,
   showManualScheduleEdit: true,
+  showMower: false,
   scheduleViewControl: "tabs",
   linkShiftViewControl: true,
   shiftViewControl: "tabs",
@@ -47,6 +49,7 @@ export function loadUserSettings(storage: StorageLike): UserSettings {
       showManualScheduleEdit: typeof value.showManualScheduleEdit === "boolean"
         ? value.showManualScheduleEdit
         : DEFAULT_USER_SETTINGS.showManualScheduleEdit,
+      showMower: typeof value.showMower === "boolean" ? value.showMower : DEFAULT_USER_SETTINGS.showMower,
       scheduleViewControl: value.scheduleViewControl === "select" ? "select" : DEFAULT_USER_SETTINGS.scheduleViewControl,
       linkShiftViewControl: typeof value.linkShiftViewControl === "boolean"
         ? value.linkShiftViewControl

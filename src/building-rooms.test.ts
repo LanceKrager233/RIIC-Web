@@ -125,6 +125,28 @@ test("combines room and name-substring filters with AND and sorts by name", () =
   assert.ok(all.includes("阿米娅") && all.includes("阿能") && all.includes("能天使"));
 });
 
+test("supports Chinese operator-name fuzzy queries", () => {
+  const operators: OperatorWithSkills[] = [
+    { name: "能天使", buildingSkills: [{ id: "manu_x" }] },
+    { name: "阿米娅", buildingSkills: [{ id: "control_x" }] },
+  ];
+  const lookup: SkillRecordLookup = (id) => id === "manu_x"
+    ? { name: "金属工艺·β", description: "贵金属生产力" }
+    : { name: "合作协议", description: "贸易站订单效率" };
+  assert.deepEqual(filterOperators(operators, null, null, "阿米", lookup).map((operator) => operator.name), ["阿米娅"]);
+  assert.deepEqual(filterOperators(operators, null, null, "my", lookup).map((operator) => operator.name), ["阿米娅"]);
+  assert.deepEqual(filterOperators(operators, null, null, "amy", lookup).map((operator) => operator.name), ["阿米娅"]);
+  assert.deepEqual(filterOperators(operators, null, null, "amiya", lookup).map((operator) => operator.name), ["阿米娅"]);
+  assert.deepEqual(filterOperators(operators, null, null, "Amiya", lookup).map((operator) => operator.name), ["阿米娅"]);
+});
+
+test("keeps both pinyin readings for 仇白", () => {
+  const operators: OperatorWithSkills[] = [{ name: "仇白", buildingSkills: [{ id: "control_x" }] }];
+  const lookup: SkillRecordLookup = () => ({});
+  assert.deepEqual(filterOperators(operators, null, null, "choubai", lookup).map((operator) => operator.name), ["仇白"]);
+  assert.deepEqual(filterOperators(operators, null, null, "qiubai", lookup).map((operator) => operator.name), ["仇白"]);
+});
+
 test("matches queries against skill names and plain-text descriptions", () => {
   const operators: OperatorWithSkills[] = [
     { name: "阿米娅", buildingSkills: [{ id: "control_x" }] },
