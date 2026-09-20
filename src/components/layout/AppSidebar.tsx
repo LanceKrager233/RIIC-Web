@@ -6,6 +6,7 @@ import {
   BookOpen,
   CircleHelp,
   Cloud,
+  Clock3,
   GraduationCap,
   Search,
   Settings2,
@@ -101,6 +102,7 @@ export function AppSidebar({ page, onPageChange }: AppSidebarProps) {
           <SidebarGroupLabel>{labels.progressionGroup}</SidebarGroupLabel>
           <SidebarMenu>
             <AppNavigationItem page={page} target="mastery" label={labels.mastery} icon={BookOpen} onPageChange={onPageChange} />
+            <AppNavigationItem page={page} target="upgrade-cycle" label={locale === "en" ? "Progression cycle" : "提升周期"} icon={Clock3} onPageChange={onPageChange} />
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup>
