@@ -7,6 +7,7 @@ import {
   CircleHelp,
   Cloud,
   Clock3,
+  PackageOpen,
   GraduationCap,
   Search,
   Settings2,
@@ -116,6 +117,9 @@ export function AppSidebar({ page, onPageChange }: AppSidebarProps) {
           <SidebarMenu>
             {CLIENT_SKLAND_ENABLED ? (
               <AppNavigationItem page={page} target="skland" label={labels.skland} icon={Cloud} onPageChange={onPageChange} />
+            ) : null}
+            {CLIENT_SKLAND_ENABLED ? (
+              <AppNavigationItem page={page} target="inventory" label={locale === "en" ? "Inventory" : "查看库存"} icon={PackageOpen} onPageChange={onPageChange} />
             ) : null}
             <AppNavigationItem page={page} target="account" label={labels.account} icon={UserRound} onPageChange={onPageChange} />
             <AppNavigationItem page={page} target="settings" label={labels.settings} icon={Settings2} onPageChange={onPageChange} />
